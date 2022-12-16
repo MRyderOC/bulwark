@@ -15,6 +15,7 @@ import pandas as pd
 import pandas.testing as tm
 
 from bulwark.generic import bad_locations
+from bulwark.generic import series_dtype_check
 
 # Required for DeprecationWarnings to not be ignored
 warnings.simplefilter('always', DeprecationWarning)
@@ -600,5 +601,24 @@ def custom_check(df, check_func, *args, **kwargs):
         msg = "{} is not true.".format(check_func.__name__)
         e.args = (msg,)
         raise
+
+    return df
+
+
+def has_schema(df, schema=None):
+    """Asserts that `df` has ``dtypes``
+
+    Args:
+        df (pd.DataFrame): Any pd.DataFrame.
+        schema (dict): Mapping of columns to dtypes as string.
+
+    Returns:
+        Original `df`.
+
+    """
+    for col, dtype in schema.items():
+        if not series_dtype_check(df[col], dtype):
+            raise AssertionError("{} has the wrong dtype. Should be ({}), is ({})"
+                                 .format(col, dtype, df[col].dtype))
 
     return df
